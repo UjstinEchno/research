@@ -895,13 +895,6 @@ body {
   image-rendering: pixelated;
 }
 
-.img-trio div:hover img { filter: saturate(0.95) !important; }
-
-@media (max-width: 680px) {
-  .img-trio { grid-template-columns: 1fr !important; }
-  .img-trio div { height: 55vw !important; }
-}
-
 /* ── RESPONSIVE ── */
 @media (max-width: 680px) {
   .side-nav { display: none; }
@@ -1221,13 +1214,20 @@ body {
 
 
 <!-- ══ IMAGE — the altar close ══ -->
-<!-- ══ 055 — full width, full height ══ -->
-<div class="img-full" style="height:100vh;">
+<div class="img-full">
   <img
     src="assets/img/20260523_055_cred_VeraMarmelo_web.jpg"
     alt="Close-up of the glowing mylar and crochet hoop on the subwoofer">
 </div>
 <p class="img-caption">The central altar — mylar, CTB gel, crochet hoop on subwoofer</p>
+
+
+<!-- ══ IMAGE — wide, full room ══ -->
+<div class="img-full" style="height:90vh; margin-top:3px;">
+  <img
+    src="assets/img/20260523_056_cred_VeraMarmelo_web.jpg"
+    alt="The altar and surrounding stand infrastructure">
+</div>
 
 
 <!-- ══ FIRST QUOTE ══ -->
@@ -1239,27 +1239,30 @@ body {
 </div>
 
 
-<!-- ══ THREE ACROSS — 072, 058, 057 ══ -->
-<div class="img-trio" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-top:3px;">
-  <div style="height:65vh;overflow:hidden;">
+<!-- ══ PAIR — keffiyeh + room overview ══ -->
+<div class="img-pair">
+  <div class="img-cell">
     <img
       src="assets/img/20260523_072_cred_VeraMarmelo_web.jpg"
-      alt="Keffiyeh-wrapped altar with monitors visible"
-      style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.75);transition:filter 1.2s ease;">
+      alt="Keffiyeh-wrapped altar with monitors visible">
   </div>
-  <div style="height:65vh;overflow:hidden;">
+  <div class="img-cell">
     <img
       src="assets/img/20260523_058_cred_VeraMarmelo_web.jpg"
-      alt="Full room — all stands, speakers, traffic cone"
-      style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.75);transition:filter 1.2s ease;">
-  </div>
-  <div style="height:65vh;overflow:hidden;">
-    <img
-      src="assets/img/20260523_057_cred_VeraMarmelo_web.jpg"
-      alt="Large reflector light on stand, hoop on floor below"
-      style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.75);transition:filter 1.2s ease;">
+      alt="Full room — all stands, speakers, traffic cone">
   </div>
 </div>
+
+
+<!-- ══ HALF IMAGE — stands and reflector, right aligned ══ -->
+<div class="img-half right" style="margin-top:3px;">
+  <img
+    src="assets/img/20260523_057_cred_VeraMarmelo_web.jpg"
+    alt="Large reflector light on stand, hoop on floor below">
+</div>
+<p class="img-caption" style="text-align:right; padding-right:44px; padding-left:0;">
+  Industrial reflector, crochet hoop on floor
+</p>
 
 
 <!-- ══ CONTEXT ══ -->
@@ -1275,13 +1278,20 @@ body {
 </div>
 
 
-<!-- ══ 061 — full frame, replaces 061+062 ══ -->
-<div class="img-full" style="height:75vh;">
+<!-- ══ MEGAPHONE IMAGES ══ -->
+<div class="img-full">
   <img
     src="assets/img/20260523_061_cred_VeraMarmelo_web.jpg"
-    alt="Megaphone on stand, atmospheric light projection filling the room">
+    alt="Megaphone on stand, light projected across the ceiling">
 </div>
 <p class="img-caption">Megaphone on industrial stand — the cacophony projected upward</p>
+
+
+<div class="img-half" style="margin-top:3px;">
+  <img
+    src="assets/img/20260523_062_cred_VeraMarmelo_web.jpg"
+    alt="Wide shot of the megaphone room with atmospheric light projection">
+</div>
 
 
 <!-- ══ ALTAR DETAIL ══ -->
@@ -1748,7 +1758,14 @@ render();
     'assets/img/20260523_072_cred_VeraMarmelo_web.jpg',
   ];
 
-  IMAGES.forEach(function(src) { var i = new Image(); i.src = src; });
+  /* Preload */
+  var preloaded = {};
+  IMAGES.forEach(function(src) {
+    var img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = src;
+    preloaded[src] = img;
+  });
 
   var deck = [];
   function nextImage() {
@@ -1757,45 +1774,175 @@ render();
   }
 
   var SIZES = [
-    { w: '38vw', h: '55vh' },
-    { w: '45vw', h: '42vh' },
-    { w: '32vw', h: '60vh' },
-    { w: '52vw', h: '48vh' },
-    { w: '28vw', h: '50vh' },
+    { w: 380, h: 520 },
+    { w: 440, h: 400 },
+    { w: 320, h: 580 },
+    { w: 500, h: 460 },
+    { w: 280, h: 480 },
   ];
 
-  var FADE_IN_MS  = 400;
-  var FADE_OUT_MS = 15000;
+  var TOTAL_MS   = 15000;  /* total lifetime */
+  var PHASE1_MS  = 7000;   /* pure fade phase */
+  var PHASE2_MS  = 8000;   /* stipple phase */
+  var FADEIN_MS  = 400;
 
-  function spawnGhost(x, y) {
-    var ghost = document.createElement('div');
-    ghost.className = 'ghost';
-    ghost.style.left   = x + 'px';
-    ghost.style.top    = y + 'px';
-    ghost.style.width  = SIZES[Math.floor(Math.random() * SIZES.length)].w;
-    ghost.style.height = SIZES[Math.floor(Math.random() * SIZES.length)].h;
+  /* ── Stipple renderer ── */
+  function renderStipple(canvas, srcImg, progress) {
+    /* progress: 0 = stipple just starting, 1 = fully stippled/gone */
+    var w = canvas.width, h = canvas.height;
+    var ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
 
-    var img = document.createElement('img');
-    img.src = nextImage();
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.6) brightness(0.85);';
-    ghost.appendChild(img);
-    document.body.appendChild(ghost);
+    /* Draw the source image into an offscreen canvas to sample pixels */
+    var off = document.createElement('canvas');
+    var scale = 0.25; /* sample at 25% for performance */
+    off.width  = Math.max(1, Math.round(w * scale));
+    off.height = Math.max(1, Math.round(h * scale));
+    var octx = off.getContext('2d');
+    octx.drawImage(srcImg, 0, 0, off.width, off.height);
 
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        ghost.style.transition = 'opacity ' + FADE_IN_MS + 'ms ease-in';
-        ghost.style.opacity = '1';
-        setTimeout(function() {
-          ghost.style.transition = 'opacity ' + FADE_OUT_MS + 'ms ease-out';
-          ghost.style.opacity = '0';
-          setTimeout(function() {
-            if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
-          }, FADE_OUT_MS);
-        }, FADE_IN_MS);
-      });
-    });
+    var imageData;
+    try {
+      imageData = octx.getImageData(0, 0, off.width, off.height);
+    } catch(e) {
+      /* cross-origin fallback — use noise-based stipple */
+      imageData = null;
+    }
+
+    /* Dot grid parameters — dots grow as progress increases */
+    var minDot  = 1;
+    var maxDot  = 6 + progress * 10;
+    var spacing = 8 + progress * 4;
+
+    /* Stipple opacity: ramps up from 0→1 in first half, then fades 1→0 */
+    var stippleAlpha = progress < 0.5
+      ? progress * 2
+      : 1 - ((progress - 0.5) * 2);
+
+    ctx.fillStyle = 'rgba(232,230,224,' + stippleAlpha + ')';
+
+    var cols = Math.ceil(w / spacing);
+    var rows = Math.ceil(h / spacing);
+
+    for (var row = 0; row < rows; row++) {
+      for (var col = 0; col < cols; col++) {
+        var cx = col * spacing + spacing * 0.5;
+        var cy = row * spacing + spacing * 0.5;
+
+        var lum;
+        if (imageData) {
+          /* Sample luminosity from the source image */
+          var sx = Math.floor((cx / w) * off.width);
+          var sy = Math.floor((cy / h) * off.height);
+          sx = Math.max(0, Math.min(off.width  - 1, sx));
+          sy = Math.max(0, Math.min(off.height - 1, sy));
+          var i  = (sy * off.width + sx) * 4;
+          var r  = imageData.data[i];
+          var g  = imageData.data[i+1];
+          var b  = imageData.data[i+2];
+          lum = (0.299*r + 0.587*g + 0.114*b) / 255;
+        } else {
+          /* Fallback: noise-based luminosity */
+          lum = 0.3 + 0.4 * Math.sin(col * 0.7 + row * 0.5);
+        }
+
+        /* Dark areas = larger dots (invert: 1-lum) */
+        var dotR = minDot + (1 - lum) * (maxDot - minDot);
+        dotR *= (0.7 + progress * 0.6); /* grow as image dissolves */
+
+        /* Jitter for organic feel */
+        var jx = (Math.random() - 0.5) * spacing * 0.3;
+        var jy = (Math.random() - 0.5) * spacing * 0.3;
+
+        ctx.beginPath();
+        ctx.arc(cx + jx, cy + jy, Math.max(0.5, dotR), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
   }
 
+  function spawnGhost(clickX, clickY) {
+    var src    = nextImage();
+    var size   = SIZES[Math.floor(Math.random() * SIZES.length)];
+    var srcImg = preloaded[src];
+    var start  = performance.now();
+
+    /* Ghost container */
+    var ghost = document.createElement('div');
+    ghost.className = 'ghost';
+    ghost.style.left   = clickX + 'px';
+    ghost.style.top    = clickY + 'px';
+    ghost.style.width  = size.w + 'px';
+    ghost.style.height = size.h + 'px';
+    ghost.style.position = 'fixed';
+
+    /* Photo layer */
+    var img = document.createElement('img');
+    img.src = src;
+    img.crossOrigin = 'anonymous';
+    img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.6) brightness(0.85);';
+    ghost.appendChild(img);
+
+    /* Stipple canvas layer */
+    var stipCanvas = document.createElement('canvas');
+    stipCanvas.width  = size.w;
+    stipCanvas.height = size.h;
+    stipCanvas.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:0;';
+    ghost.appendChild(stipCanvas);
+
+    document.body.appendChild(ghost);
+
+    /* Fade in */
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        ghost.style.transition = 'opacity ' + FADEIN_MS + 'ms ease-in';
+        ghost.style.opacity = '1';
+      });
+    });
+
+    var stippleRAF;
+
+    function tick() {
+      var elapsed = performance.now() - start - FADEIN_MS;
+      if (elapsed < 0) { stippleRAF = requestAnimationFrame(tick); return; }
+
+      var total = TOTAL_MS - FADEIN_MS;
+      var t = Math.min(1, elapsed / total); /* 0→1 over lifetime */
+
+      if (t >= 1) {
+        /* Done — remove */
+        if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+        return;
+      }
+
+      if (elapsed < PHASE1_MS) {
+        /* Phase 1: simple opacity fade 1→0.15 */
+        var p1 = elapsed / PHASE1_MS;
+        img.style.opacity = String(1 - p1 * 0.85);
+        stipCanvas.style.opacity = '0';
+
+      } else {
+        /* Phase 2: stipple grows, image finishes fading */
+        var p2 = (elapsed - PHASE1_MS) / PHASE2_MS;
+        img.style.opacity = String(Math.max(0, 0.15 - p2 * 0.15));
+        stipCanvas.style.opacity = '1';
+
+        /* Only redraw stipple every ~4 frames for performance */
+        if (!tick._lastStip || elapsed - tick._lastStip > 66) {
+          tick._lastStip = elapsed;
+          if (srcImg.complete && srcImg.naturalWidth) {
+            renderStipple(stipCanvas, srcImg, p2);
+          }
+        }
+      }
+
+      stippleRAF = requestAnimationFrame(tick);
+    }
+
+    stippleRAF = requestAnimationFrame(tick);
+  }
+
+  /* Click listener */
   document.addEventListener('click', function(e) {
     if (e.target.closest('a,button,input,select,textarea,audio,video,iframe,#research-panel,.side-nav,#play-btn,#vol-panel,#room,#ambient-player')) return;
     spawnGhost(e.clientX, e.clientY);
