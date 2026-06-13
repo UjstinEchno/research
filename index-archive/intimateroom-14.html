@@ -580,51 +580,54 @@ body {
   align-items: flex-end;
   gap: 0;
   padding: 12px 0;
+  /* frosted glass distortion zone */
   isolation: isolate;
 }
 
-/* The distortion layer */
+/* The distortion layer — sits behind the text, above the page */
 .side-nav::before {
   content: '';
   position: absolute;
-  inset: -24px -0px -24px -52px;
+  inset: -20px -0px -20px -40px;
   z-index: -1;
-  backdrop-filter: blur(10px) brightness(0.65) saturate(1.6) contrast(1.1);
-  -webkit-backdrop-filter: blur(10px) brightness(0.65) saturate(1.6) contrast(1.1);
+  /* multi-layer backdrop for the glass feel */
+  backdrop-filter: blur(12px) brightness(0.72) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) brightness(0.72) saturate(1.4);
+  /* soft vignette mask so edges dissolve rather than hard-cut */
   -webkit-mask-image: linear-gradient(
     to left,
-    rgba(0,0,0,1) 35%,
-    rgba(0,0,0,0.7) 60%,
-    rgba(0,0,0,0.2) 85%,
+    rgba(0,0,0,0.92) 40%,
+    rgba(0,0,0,0.5) 70%,
     transparent 100%
   );
   mask-image: linear-gradient(
     to left,
-    rgba(0,0,0,1) 35%,
-    rgba(0,0,0,0.7) 60%,
-    rgba(0,0,0,0.2) 85%,
+    rgba(0,0,0,0.92) 40%,
+    rgba(0,0,0,0.5) 70%,
     transparent 100%
   );
-  border-radius: 1px;
+  /* SVG turbulence displacement — the actual distortion */
+  filter: url(#nav-distort);
+  border-radius: 2px;
 }
 
-/* Left edge highlight */
+/* Edge highlight — thin inner glow on the left side of the glass */
 .side-nav::after {
   content: '';
   position: absolute;
-  top: -24px;
-  bottom: -24px;
-  left: -52px;
+  top: -20px;
+  bottom: -20px;
+  left: -40px;
   width: 1px;
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(255,255,255,0.05) 30%,
-    rgba(255,255,255,0.12) 50%,
-    rgba(255,255,255,0.05) 70%,
+    rgba(255,255,255,0.06) 30%,
+    rgba(255,255,255,0.1) 50%,
+    rgba(255,255,255,0.06) 70%,
     transparent
   );
-  z-index: 1;
+  z-index: -1;
   pointer-events: none;
 }
 
@@ -852,17 +855,6 @@ body {
 .panel-content { display: none; }
 .panel-content.visible { display: block; }
 
-/* nav distortion canvas */
-#nav-distort-canvas {
-  position: fixed;
-  right: 0;
-  top: 0;
-  width: 180px;
-  height: 100%;
-  z-index: 299;
-  pointer-events: none;
-}
-
 /* ── RESPONSIVE ── */
 @media (max-width: 680px) {
   .side-nav { display: none; }
@@ -924,8 +916,30 @@ body {
 <!-- BACK BUTTON -->
 <a class="back" href="index.html">← Research</a>
 
-<!-- Nav distortion canvas — sits behind side-nav text -->
-<canvas id="nav-distort-canvas"></canvas>
+<!-- SVG filter for nav distortion effect -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden;">
+  <defs>
+    <filter id="nav-distort" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.018 0.032"
+        numOctaves="3"
+        seed="8"
+        result="noise"/>
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="noise"
+        scale="14"
+        xChannelSelector="R"
+        yChannelSelector="G"
+        result="displaced"/>
+      <feGaussianBlur
+        in="displaced"
+        stdDeviation="0.5"
+        result="softened"/>
+    </filter>
+  </defs>
+</svg>
 
 <!-- FLOATING SIDE COLUMN -->
 <nav class="side-nav" aria-label="Research sections">
@@ -1699,152 +1713,6 @@ render();
     if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
   });
 
-})();
-</script>
-<!-- ══ NAV DISTORTION JS ══ -->
-<script>
-(function() {
-  var canvas = document.getElementById('nav-distort-canvas');
-  if (!canvas) return;
-  var ctx = canvas.getContext('2d');
-
-  /* Noise field — precomputed once */
-  var NOISE_W = 64, NOISE_H = 256;
-  var noiseX = new Float32Array(NOISE_W * NOISE_H);
-  var noiseY = new Float32Array(NOISE_W * NOISE_H);
-
-  /* Simple smooth noise using sine harmonics */
-  function generateNoise() {
-    for (var y = 0; y < NOISE_H; y++) {
-      for (var x = 0; x < NOISE_W; x++) {
-        var i = y * NOISE_W + x;
-        var nx = x / NOISE_W, ny = y / NOISE_H;
-        noiseX[i] = (
-          Math.sin(nx * 3.1 + ny * 2.7) * 0.5 +
-          Math.sin(nx * 7.3 - ny * 5.1) * 0.3 +
-          Math.sin(nx * 13.7 + ny * 11.3) * 0.2
-        );
-        noiseY[i] = (
-          Math.cos(nx * 2.9 + ny * 4.1) * 0.5 +
-          Math.cos(nx * 6.1 - ny * 8.3) * 0.3 +
-          Math.cos(nx * 11.1 + ny * 14.7) * 0.2
-        );
-      }
-    }
-  }
-  generateNoise();
-
-  function sampleNoise(arr, px, py) {
-    var nx = Math.max(0, Math.min(NOISE_W - 1, Math.floor(px * NOISE_W)));
-    var ny = Math.max(0, Math.min(NOISE_H - 1, Math.floor(py * NOISE_H)));
-    return arr[ny * NOISE_W + nx];
-  }
-
-  function resize() {
-    canvas.width  = canvas.offsetWidth  * window.devicePixelRatio;
-    canvas.height = canvas.offsetHeight * window.devicePixelRatio;
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-
-  var STRENGTH  = 18;  /* pixel displacement amount */
-  var BLUR      = 6;   /* gaussian blur radius */
-  var FADE_START = 0.35; /* fraction of width where fade begins */
-
-  function draw() {
-    var w = canvas.width, h = canvas.height;
-    if (w === 0 || h === 0) { requestAnimationFrame(draw); return; }
-
-    ctx.clearRect(0, 0, w, h);
-
-    /* Capture the page area behind this canvas position */
-    var rect = canvas.getBoundingClientRect();
-
-    /* Draw page content scaled to canvas size using html2canvas-free approach:
-       We use drawImage on the body — not available cross-origin, so instead
-       we use the backdrop approach: render pixel rows with displacement */
-
-    /* Pixel-level displacement using ImageData */
-    var imgData;
-    try {
-      /* Attempt to read page pixels — works only same-origin */
-      imgData = ctx.getImageData(0, 0, w, h);
-    } catch(e) {
-      requestAnimationFrame(draw);
-      return;
-    }
-
-    /* Apply vertical sine wave distortion column by column */
-    ctx.save();
-    ctx.filter = 'blur(' + BLUR + 'px) brightness(0.7) saturate(1.5)';
-
-    /* Draw a displacement overlay — vertical wavy lines */
-    for (var col = 0; col < w; col++) {
-      var xFrac = col / w;
-      /* Fade: distortion strongest at right edge, dissolves left */
-      var edgeFade = Math.max(0, (xFrac - FADE_START) / (1 - FADE_START));
-      edgeFade = Math.pow(edgeFade, 1.5);
-
-      var dispY = sampleNoise(noiseY, xFrac, 0.5) * STRENGTH * edgeFade * window.devicePixelRatio;
-      var dispX = sampleNoise(noiseX, xFrac, 0.5) * STRENGTH * 0.4 * edgeFade * window.devicePixelRatio;
-
-      ctx.drawImage(canvas,
-        col, 0, 1, h,               /* source strip */
-        col + dispX, dispY, 1, h    /* displaced destination */
-      );
-    }
-
-    ctx.restore();
-    requestAnimationFrame(draw);
-  }
-
-  /* Use a simpler, more reliable approach: CSS backdrop-filter handles the blur/color,
-     canvas handles an animated wave overlay using compositing */
-
-  function drawWave(t) {
-    var w = canvas.width, h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
-
-    var dpr = window.devicePixelRatio || 1;
-
-    /* Draw subtle vertical wave lines that animate slowly */
-    for (var col = 0; col < w; col += 2) {
-      var xFrac = col / w;
-      var edgeFade = Math.max(0, (xFrac - FADE_START) / (1 - FADE_START));
-      edgeFade = Math.pow(edgeFade, 2);
-      if (edgeFade < 0.01) continue;
-
-      /* Wave phase varies per column and over time */
-      var phase  = col * 0.04 + t * 0.0008;
-      var waveAmp = 6 * edgeFade * dpr;
-      var waveY  = Math.sin(phase) * waveAmp;
-
-      /* Draw a thin semi-transparent vertical strip, shifted by waveY */
-      var alpha = 0.06 * edgeFade;
-      ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
-      ctx.fillRect(col, waveY, 1.5, h);
-
-      /* Dark trough between waves */
-      ctx.fillStyle = 'rgba(0,0,0,' + (alpha * 0.5) + ')';
-      ctx.fillRect(col, -waveY, 1.5, h);
-    }
-
-    /* Gradient mask — fade left edge */
-    var grad = ctx.createLinearGradient(0, 0, w, 0);
-    grad.addColorStop(0, 'rgba(0,0,0,1)');
-    grad.addColorStop(FADE_START, 'rgba(0,0,0,1)');
-    grad.addColorStop(0.6, 'rgba(0,0,0,0.3)');
-    grad.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.globalCompositeOperation = 'destination-in';
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, w, h);
-    ctx.globalCompositeOperation = 'source-over';
-
-    requestAnimationFrame(drawWave);
-  }
-
-  requestAnimationFrame(drawWave);
 })();
 </script>
 </body>
