@@ -684,8 +684,8 @@ body {
 /* Panel section tabs — navigate between sections without closing */
 .panel-tabs {
   display: flex;
+  flex-wrap: wrap;
   border-bottom: 1px solid #1a1a1a;
-  overflow-x: auto;
   flex-shrink: 0;
 }
 
@@ -700,6 +700,7 @@ body {
   background: none;
   border: none;
   border-right: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
   cursor: pointer;
   transition: color 0.12s, background 0.12s;
   white-space: nowrap;
@@ -821,6 +822,80 @@ body {
 
 .ghost.visible  { opacity: 1; }
 .ghost.fading   { opacity: 0; transition: opacity 15s ease-out; }
+/* ── AMBIENT PLAYER ── */
+#ambient-player {
+  position: fixed;
+  top: 28px;
+  left: 28px;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(14,14,14,0.88);
+  border: 1px solid #1e1e1e;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 10px 14px;
+  font-family: var(--mono);
+}
+
+#ambient-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--dim);
+  font-size: 12px;
+  padding: 0;
+  line-height: 1;
+  transition: color 0.15s;
+  flex-shrink: 0;
+  font-family: var(--mono);
+}
+
+#ambient-toggle:hover  { color: var(--ink); }
+#ambient-toggle.playing { color: var(--blue); }
+
+#ambient-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: lowercase;
+  color: #333;
+  flex-shrink: 0;
+  font-family: var(--mono);
+}
+
+#ambient-vol {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 72px;
+  height: 2px;
+  background: #2a2a2a;
+  outline: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#ambient-vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dim);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#ambient-vol::-webkit-slider-thumb:hover { background: var(--blue); }
+
+#ambient-vol::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--dim);
+  border: none;
+  cursor: pointer;
+}
+
 #nav-distort-canvas {
   position: fixed;
   right: 0;
@@ -895,6 +970,17 @@ body {
 
 <!-- Nav distortion canvas — sits behind side-nav text -->
 <canvas id="nav-distort-canvas"></canvas>
+
+<!-- AMBIENT PLAYER -->
+<div id="ambient-player">
+  <button id="ambient-toggle" title="Play / pause">▶</button>
+  <span id="ambient-label">mylar sheet</span>
+  <input id="ambient-vol" type="range" min="0" max="1" step="0.01" value="0.5" title="Volume">
+</div>
+
+<audio id="ambient-audio" loop preload="auto">
+  <source src="assets/sound/MylarSheet-128.mp3" type="audio/mpeg">
+</audio>
 
 <!-- FLOATING SIDE COLUMN -->
 <nav class="side-nav" aria-label="Research sections">
@@ -1113,7 +1199,6 @@ body {
     src="assets/img/20260523_059_cred_VeraMarmelo_web.jpg"
     alt="The installation space — glowing hoop at centre, person silhouetted in doorway">
   <div class="opening-text">
-    <p class="opening-eyebrow">Intermedia installation &nbsp;·&nbsp; Lusofona, Lisbon &nbsp;·&nbsp; May 2026</p>
     <h1 class="title">
       <span class="l1">"I just need</span>
       <span class="l2">an intimate room,</span>
@@ -1860,6 +1945,34 @@ render();
     raf = requestAnimationFrame(loop);
   }, 50);
 
+})();
+</script>
+<!-- ══ AMBIENT PLAYER JS ══ -->
+<script>
+(function() {
+  var audio   = document.getElementById('ambient-audio');
+  var toggle  = document.getElementById('ambient-toggle');
+  var vol     = document.getElementById('ambient-vol');
+
+  if (!audio || !toggle || !vol) return;
+
+  audio.volume = parseFloat(vol.value);
+
+  toggle.addEventListener('click', function() {
+    if (audio.paused) {
+      audio.play();
+      toggle.textContent = '◼';
+      toggle.classList.add('playing');
+    } else {
+      audio.pause();
+      toggle.textContent = '▶';
+      toggle.classList.remove('playing');
+    }
+  });
+
+  vol.addEventListener('input', function() {
+    audio.volume = parseFloat(vol.value);
+  });
 })();
 </script>
 </body>
