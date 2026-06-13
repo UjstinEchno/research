@@ -820,7 +820,7 @@ body {
 }
 
 .ghost.visible  { opacity: 1; }
-.ghost.fading   { opacity: 0; transition: opacity 4s ease-out; }
+.ghost.fading   { opacity: 0; transition: opacity 15s ease-out; }
 #nav-distort-canvas {
   position: fixed;
   right: 0;
@@ -1709,8 +1709,7 @@ render();
   ];
 
   var FADE_IN_MS  = 400;
-  var HOLD_MS     = 15000;
-  var FADE_OUT_MS = 4000;
+  var FADE_OUT_MS = 15000;
 
   function spawnGhost(x, y) {
     var src  = nextImage();
@@ -1729,21 +1728,20 @@ render();
     ghost.appendChild(img);
     document.body.appendChild(ghost);
 
-    /* Fade in */
+    /* Fade in, then immediately start slow dissolve */
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
         ghost.classList.add('visible');
+        /* Begin fade-out right after fade-in lands */
+        setTimeout(function() {
+          ghost.classList.remove('visible');
+          ghost.classList.add('fading');
+          setTimeout(function() {
+            if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
+          }, FADE_OUT_MS);
+        }, FADE_IN_MS);
       });
     });
-
-    /* Hold, then fade out */
-    setTimeout(function() {
-      ghost.classList.remove('visible');
-      ghost.classList.add('fading');
-      setTimeout(function() {
-        if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
-      }, FADE_OUT_MS);
-    }, HOLD_MS);
   }
 
   /* Listen for clicks — ignore interactive elements */
