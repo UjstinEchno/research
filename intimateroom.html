@@ -809,19 +809,7 @@ body {
   overflow: hidden;
   transform: translate(-50%, -50%);
   opacity: 0;
-  transition: opacity 0.4s ease-in;
 }
-
-.ghost img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: saturate(0.6) brightness(0.85);
-}
-
-.ghost.visible  { opacity: 1; }
-.ghost.fading   { opacity: 0; transition: opacity 15s ease-out; }
 /* ── AMBIENT PLAYER ── */
 #ambient-player {
   position: fixed;
@@ -905,6 +893,13 @@ body {
   z-index: 299;
   pointer-events: none;
   image-rendering: pixelated;
+}
+
+.img-trio div:hover img { filter: saturate(0.95) !important; }
+
+@media (max-width: 680px) {
+  .img-trio { grid-template-columns: 1fr !important; }
+  .img-trio div { height: 55vw !important; }
 }
 
 /* ── RESPONSIVE ── */
@@ -1226,20 +1221,13 @@ body {
 
 
 <!-- ══ IMAGE — the altar close ══ -->
-<div class="img-full">
+<!-- ══ 055 — full width, full height ══ -->
+<div class="img-full" style="height:100vh;">
   <img
     src="assets/img/20260523_055_cred_VeraMarmelo_web.jpg"
     alt="Close-up of the glowing mylar and crochet hoop on the subwoofer">
 </div>
 <p class="img-caption">The central altar — mylar, CTB gel, crochet hoop on subwoofer</p>
-
-
-<!-- ══ IMAGE — wide, full room ══ -->
-<div class="img-full" style="height:90vh; margin-top:3px;">
-  <img
-    src="assets/img/20260523_056_cred_VeraMarmelo_web.jpg"
-    alt="The altar and surrounding stand infrastructure">
-</div>
 
 
 <!-- ══ FIRST QUOTE ══ -->
@@ -1251,30 +1239,27 @@ body {
 </div>
 
 
-<!-- ══ PAIR — keffiyeh + room overview ══ -->
-<div class="img-pair">
-  <div class="img-cell">
+<!-- ══ THREE ACROSS — 072, 058, 057 ══ -->
+<div class="img-trio" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-top:3px;">
+  <div style="height:65vh;overflow:hidden;">
     <img
       src="assets/img/20260523_072_cred_VeraMarmelo_web.jpg"
-      alt="Keffiyeh-wrapped altar with monitors visible">
+      alt="Keffiyeh-wrapped altar with monitors visible"
+      style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.75);transition:filter 1.2s ease;">
   </div>
-  <div class="img-cell">
+  <div style="height:65vh;overflow:hidden;">
     <img
       src="assets/img/20260523_058_cred_VeraMarmelo_web.jpg"
-      alt="Full room — all stands, speakers, traffic cone">
+      alt="Full room — all stands, speakers, traffic cone"
+      style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.75);transition:filter 1.2s ease;">
+  </div>
+  <div style="height:65vh;overflow:hidden;">
+    <img
+      src="assets/img/20260523_057_cred_VeraMarmelo_web.jpg"
+      alt="Large reflector light on stand, hoop on floor below"
+      style="width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.75);transition:filter 1.2s ease;">
   </div>
 </div>
-
-
-<!-- ══ HALF IMAGE — stands and reflector, right aligned ══ -->
-<div class="img-half right" style="margin-top:3px;">
-  <img
-    src="assets/img/20260523_057_cred_VeraMarmelo_web.jpg"
-    alt="Large reflector light on stand, hoop on floor below">
-</div>
-<p class="img-caption" style="text-align:right; padding-right:44px; padding-left:0;">
-  Industrial reflector, crochet hoop on floor
-</p>
 
 
 <!-- ══ CONTEXT ══ -->
@@ -1290,24 +1275,17 @@ body {
 </div>
 
 
-<!-- ══ MEGAPHONE IMAGES ══ -->
+<!-- ══ 061 — original width ══ -->
 <div class="img-full">
   <img
     src="assets/img/20260523_061_cred_VeraMarmelo_web.jpg"
-    alt="Megaphone on stand, light projected across the ceiling">
+    alt="Megaphone on stand, atmospheric light projection filling the room">
 </div>
 <p class="img-caption">Megaphone on industrial stand — the cacophony projected upward</p>
 
 
-<div class="img-half" style="margin-top:3px;">
-  <img
-    src="assets/img/20260523_062_cred_VeraMarmelo_web.jpg"
-    alt="Wide shot of the megaphone room with atmospheric light projection">
-</div>
-
-
 <!-- ══ ALTAR DETAIL ══ -->
-<div class="img-full" style="margin-top:3px; height:90vh;">
+<div class="img-full" style="margin-top:3px; height:100vh;">
   <img
     src="assets/img/20260523_060_cred_VeraMarmelo_web.jpg"
     alt="The altar surrounded by industrial stands and cables">
@@ -1770,21 +1748,14 @@ render();
     'assets/img/20260523_072_cred_VeraMarmelo_web.jpg',
   ];
 
-  /* Preload all images so they appear instantly on click */
-  IMAGES.forEach(function(src) {
-    var img = new Image(); img.src = src;
-  });
+  IMAGES.forEach(function(src) { var i = new Image(); i.src = src; });
 
-  /* Shuffled deck — refill when exhausted */
   var deck = [];
   function nextImage() {
-    if (!deck.length) {
-      deck = IMAGES.slice().sort(function() { return Math.random() - 0.5; });
-    }
+    if (!deck.length) deck = IMAGES.slice().sort(function() { return Math.random() - 0.5; });
     return deck.pop();
   }
 
-  /* Ghost size: portrait or landscape randomly, centred on click */
   var SIZES = [
     { w: '38vw', h: '55vh' },
     { w: '45vw', h: '42vh' },
@@ -1797,30 +1768,26 @@ render();
   var FADE_OUT_MS = 15000;
 
   function spawnGhost(x, y) {
-    var src  = nextImage();
-    var size = SIZES[Math.floor(Math.random() * SIZES.length)];
-
     var ghost = document.createElement('div');
     ghost.className = 'ghost';
     ghost.style.left   = x + 'px';
     ghost.style.top    = y + 'px';
-    ghost.style.width  = size.w;
-    ghost.style.height = size.h;
+    ghost.style.width  = SIZES[Math.floor(Math.random() * SIZES.length)].w;
+    ghost.style.height = SIZES[Math.floor(Math.random() * SIZES.length)].h;
 
     var img = document.createElement('img');
-    img.src = src;
-    img.alt = '';
+    img.src = nextImage();
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;filter:saturate(0.6) brightness(0.85);';
     ghost.appendChild(img);
     document.body.appendChild(ghost);
 
-    /* Fade in, then immediately start slow dissolve */
     requestAnimationFrame(function() {
       requestAnimationFrame(function() {
-        ghost.classList.add('visible');
-        /* Begin fade-out right after fade-in lands */
+        ghost.style.transition = 'opacity ' + FADE_IN_MS + 'ms ease-in';
+        ghost.style.opacity = '1';
         setTimeout(function() {
-          ghost.classList.remove('visible');
-          ghost.classList.add('fading');
+          ghost.style.transition = 'opacity ' + FADE_OUT_MS + 'ms ease-out';
+          ghost.style.opacity = '0';
           setTimeout(function() {
             if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
           }, FADE_OUT_MS);
@@ -1829,13 +1796,11 @@ render();
     });
   }
 
-  /* Listen for clicks — ignore interactive elements */
   document.addEventListener('click', function(e) {
-    if (e.target.closest('a, button, input, select, textarea, audio, video, iframe, #research-panel, .side-nav, #play-btn, #vol-panel, #room')) return;
+    if (e.target.closest('a,button,input,select,textarea,audio,video,iframe,#research-panel,.side-nav,#play-btn,#vol-panel,#room,#ambient-player')) return;
     spawnGhost(e.clientX, e.clientY);
   });
 
-  /* Subtle cursor hint */
   document.body.style.cursor = 'crosshair';
 
 })();
