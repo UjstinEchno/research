@@ -1,0 +1,1481 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>an intimate room — Justin Enoch</title>
+<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100;0,300;1,300&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --bg:    #0c0c0c;
+  --ink:   #e8e6e0;
+  --dim:   #555;
+  --blue:  #4a9eff;
+  --mono:  'Azeret Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 300;
+  line-height: 1.8;
+  letter-spacing: 0.04em;
+}
+
+/* ── BACK BUTTON — fixed, top left, just text ── */
+.back {
+  position: fixed;
+  top: 28px;
+  left: 28px;
+  z-index: 200;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--bg);
+  mix-blend-mode: difference;
+  /* difference blend means it stays readable on both
+     light and dark backgrounds automatically */
+  transition: opacity 0.2s;
+}
+
+.back:hover { opacity: 0.5; }
+
+/* ── OPENING — silence before the title ── */
+.opening {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.opening img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 40%;
+  display: block;
+  filter: saturate(0.7);
+}
+
+/* Title overlaid bottom-left of opening image */
+.opening-text {
+  position: absolute;
+  bottom: 52px;
+  left: 44px;
+  right: 44px;
+  z-index: 2;
+}
+
+.opening-eyebrow {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.45);
+  margin-bottom: 28px;
+}
+
+.title {
+  font-size: clamp(13px, 1.8vw, 22px);
+  font-weight: 100;
+  line-height: 1.6;
+  color: rgba(255,255,255,0.9);
+}
+
+.title .l1 { display: block; }
+.title .l2 { display: block; padding-left: 3ch; }
+.title .l3 { display: block; padding-left: 5ch; font-style: italic; }
+.title .l4 { display: block; padding-left: 7.5ch; }
+.title .l5 { display: block; padding-left: 10ch; font-style: italic; color: rgba(74,158,255,0.85); }
+
+/* ── WALL LABEL — text between images ── */
+.label {
+  padding: 64px 44px;
+  max-width: 480px;
+}
+
+.label-tag {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 20px;
+}
+
+.label p {
+  font-size: 12px;
+  font-weight: 300;
+  line-height: 1.9;
+  color: #888;
+  margin-bottom: 1.2em;
+  max-width: 52ch;
+}
+
+.label p:last-child { margin-bottom: 0; }
+
+.label p + p { text-indent: 1.5em; }
+
+.label blockquote {
+  margin: 28px 0;
+  padding-left: 16px;
+  border-left: 1px solid #2a2a2a;
+  max-width: 48ch;
+}
+
+.label blockquote p {
+  font-style: italic;
+  color: #555;
+  text-indent: 0 !important;
+  font-size: 11px;
+}
+
+.label blockquote cite {
+  display: block;
+  margin-top: 8px;
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  color: #444;
+}
+
+/* ── FULL-BLEED IMAGE ── */
+.img-full {
+  width: 100%;
+  height: 85vh;
+  overflow: hidden;
+  position: relative;
+}
+
+.img-full img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.75);
+  transition: filter 1.2s ease;
+}
+
+.img-full:hover img { filter: saturate(0.95); }
+
+/* Narrow image — portrait, 50% width, left or right aligned */
+.img-half {
+  width: 50%;
+  height: 75vh;
+  overflow: hidden;
+}
+
+.img-half.right { margin-left: auto; }
+
+.img-half img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.75);
+  transition: filter 1.2s ease;
+}
+
+.img-half:hover img { filter: saturate(0.95); }
+
+/* Two images side by side */
+.img-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.img-pair .img-cell {
+  height: 60vh;
+  overflow: hidden;
+}
+
+.img-pair .img-cell img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.75);
+  transition: filter 1.2s ease;
+}
+
+.img-pair .img-cell:hover img { filter: saturate(0.95); }
+
+/* Caption under an image */
+.img-caption {
+  padding: 10px 44px 0;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #333;
+}
+
+/* ── DIVIDER — thin line between sections ── */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: #1a1a1a;
+  margin: 0;
+}
+
+/* ── VIDEO ── */
+.video-full {
+  width: 100%;
+  position: relative;
+  aspect-ratio: 9/16;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-full iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.video-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+}
+
+.video-cell {
+  position: relative;
+  aspect-ratio: 9/16;
+  overflow: hidden;
+  background: #000;
+}
+
+.video-cell iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* ── AUDIO PLAYER ── */
+.player-section {
+  padding: 80px 44px;
+  border-top: 1px solid #1a1a1a;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.player-tag {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 40px;
+}
+
+.player-inner {
+  max-width: 520px;
+}
+
+.player-hint {
+  font-size: 11px;
+  color: #444;
+  font-style: italic;
+  margin-bottom: 32px;
+  line-height: 1.7;
+}
+
+#room {
+  position: relative;
+  width: 100%;
+  padding-bottom: 80%;
+  background: #0a0a0a;
+  border: 1px solid #1a1a1a;
+  overflow: hidden;
+  margin-bottom: 1px;
+}
+
+.speaker-dot {
+  position: absolute;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #111;
+  border: 1px solid #2a2a2a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transform: translate(-50%,-50%);
+  transition: border-color 0.2s, background 0.2s;
+  user-select: none;
+  z-index: 5;
+}
+
+.speaker-dot:hover { border-color: #444; }
+.speaker-dot.playing { border-color: var(--blue); background: rgba(74,158,255,0.08); }
+.speaker-dot.loading { border-color: #1e1e1e; }
+
+.speaker-dot svg { width: 14px; height: 14px; }
+.speaker-dot svg path,
+.speaker-dot svg polygon {
+  stroke: #ccc;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.speaker-dot.playing svg path,
+.speaker-dot.playing svg polygon { stroke: var(--blue); }
+
+.speaker-label {
+  position: absolute;
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ccc;
+  pointer-events: none;
+  transform: translate(5px, 6px);
+}
+
+.speaker-label.water { color: var(--blue); opacity: 0.7; }
+
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--blue);
+  opacity: 0;
+  animation: ripple-out 2.2s ease-out infinite;
+  transform: translate(-50%,-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes ripple-out {
+  0%   { width: 38px; height: 38px; opacity: 0.3; }
+  100% { width: 110px; height: 110px; opacity: 0; }
+}
+
+.listener-dot {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(74,158,255,0.06);
+  border: 1px solid var(--blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%,-50%);
+  cursor: grab;
+  z-index: 20;
+}
+
+.listener-dot:active { cursor: grabbing; }
+
+.listener-dot svg { width: 14px; height: 14px; }
+.listener-dot svg path,
+.listener-dot svg circle {
+  stroke: var(--blue);
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+#vol-panel {
+  border: 1px solid #1a1a1a;
+  border-top: none;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  background: #0a0a0a;
+}
+
+.vol-label {
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.vol-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 5px 0;
+  font-size: 10px;
+}
+
+.vol-name { width: 44px; color: #444; }
+.vol-name.water { color: var(--blue); }
+.vol-bg { flex: 1; height: 1px; background: #1a1a1a; }
+.vol-fill { height: 100%; background: var(--blue); transition: width 0.1s; }
+.vol-pct { width: 28px; text-align: right; color: #333; font-size: 9px; }
+.vol-side { width: 28px; font-size: 9px; color: #333; }
+
+#play-btn {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  background: none;
+  border: 1px solid #1a1a1a;
+  color: #444;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+#play-btn:hover { border-color: var(--blue); color: var(--blue); }
+#play-btn.active { border-color: var(--blue); color: var(--blue); }
+
+#player-status {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: #333;
+  font-style: italic;
+  padding-top: 10px;
+  min-height: 16px;
+}
+
+/* ── CREDITS / FOOTER ── */
+.credits {
+  padding: 80px 44px 100px;
+}
+
+.credits-tag {
+  font-size: 9px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 40px;
+}
+
+.credits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 60px;
+  align-items: start;
+}
+
+.credits-col .cl {
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.credits-col .cv {
+  font-size: 12px;
+  font-weight: 300;
+  color: #666;
+  line-height: 1.9;
+}
+
+.credits-col a {
+  color: #666;
+  text-underline-offset: 3px;
+  text-decoration-color: #333;
+}
+
+.credits-col a:hover { color: var(--blue); text-decoration-color: var(--blue); }
+
+/* ── FLOATING SIDE COLUMN ── */
+.side-nav {
+  position: fixed;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  padding: 0;
+}
+
+.side-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px 10px 16px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
+  mix-blend-mode: difference;
+  transition: color 0.15s;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.side-nav-item:hover { color: rgba(255,255,255,0.8); }
+.side-nav-item.active { color: rgba(74,158,255,0.9); }
+
+.side-nav-item .dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.side-nav-item:hover .dot,
+.side-nav-item.active .dot { opacity: 1; }
+
+/* ── SLIDE-IN PANEL ── */
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  background: rgba(0,0,0,0.45);
+}
+
+.panel-overlay.open {
+  pointer-events: all;
+  opacity: 1;
+}
+
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(540px, 90vw);
+  z-index: 500;
+  background: #0e0e0e;
+  border-left: 1px solid #1e1e1e;
+  transform: translateX(100%);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel.open { transform: translateX(0); }
+
+.panel-head {
+  position: sticky;
+  top: 0;
+  background: #0e0e0e;
+  border-bottom: 1px solid #1a1a1a;
+  padding: 20px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.panel-section-title {
+  font-size: 9px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--blue);
+}
+
+.panel-close {
+  background: none;
+  border: none;
+  color: var(--dim);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: color 0.15s;
+  font-family: var(--mono);
+}
+
+.panel-close:hover { color: var(--ink); }
+
+/* Panel section tabs — navigate between sections without closing */
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid #1a1a1a;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.panel-tab {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  background: none;
+  border: none;
+  border-right: 1px solid #1a1a1a;
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+  white-space: nowrap;
+}
+
+.panel-tab:hover { color: var(--ink); background: #141414; }
+.panel-tab.active { color: var(--blue); background: #111; }
+
+.panel-body {
+  padding: 36px 32px 60px;
+  flex: 1;
+}
+
+.panel-body h2 {
+  font-size: 11px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 28px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.panel-body p {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.9;
+  color: #888;
+  margin-bottom: 1.3em;
+  max-width: 55ch;
+}
+
+.panel-body p:last-child { margin-bottom: 0; }
+.panel-body p + p { text-indent: 1.5em; }
+
+.panel-body h3 {
+  font-size: 10px;
+  font-weight: 300;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin: 2.5rem 0 1rem;
+}
+
+.panel-body blockquote {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border-left: 1px solid #2a2a2a;
+  background: rgba(74,158,255,0.03);
+  max-width: 50ch;
+}
+
+.panel-body blockquote p {
+  font-style: italic;
+  font-size: 12px;
+  color: #666;
+  text-indent: 0 !important;
+  margin-bottom: 0;
+}
+
+.panel-body blockquote cite {
+  display: block;
+  margin-top: 10px;
+  font-size: 9px;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  color: #444;
+}
+
+.panel-body ul, .panel-body ol {
+  margin: 0 0 1.3em 1.5em;
+  max-width: 50ch;
+}
+
+.panel-body li {
+  font-size: 13px;
+  font-weight: 300;
+  line-height: 1.9;
+  color: #888;
+  margin-bottom: 0.4em;
+}
+
+.panel-body .bib-entry {
+  padding: 16px 0;
+  border-bottom: 1px solid #1a1a1a;
+  max-width: 52ch;
+}
+
+.panel-body .bib-entry:first-of-type { border-top: 1px solid #1a1a1a; }
+
+.panel-body .bib-entry p {
+  margin-bottom: 0;
+  text-indent: 0 !important;
+  font-size: 12px;
+}
+
+.panel-content { display: none; }
+.panel-content.visible { display: block; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .side-nav { display: none; }
+  .panel { width: 100vw; border-left: none; }
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 680px) {
+  .back { top: 20px; left: 20px; }
+  .opening-text { left: 20px; right: 20px; bottom: 36px; }
+  .label { padding: 48px 20px; }
+  .img-caption { padding-left: 20px; }
+  .img-half { width: 100%; height: 60vh; }
+  .img-pair { grid-template-columns: 1fr; }
+  .img-pair .img-cell { height: 55vw; }
+  .video-pair { grid-template-columns: 1fr; }
+  .player-section { padding: 60px 20px; }
+  .credits { padding: 60px 20px 80px; }
+  .credits-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  .side-nav { display: none; }
+  .panel { width: 100vw; border-left: none; }
+  .mobile-research-btn {
+    display: flex !important;
+  }
+}
+
+/* Mobile research button — shown only on small screens */
+.mobile-research-btn {
+  display: none;
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 300;
+  background: #0e0e0e;
+  border: 1px solid #2a2a2a;
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.mobile-research-btn:hover { color: var(--blue); border-color: var(--blue); }
+
+@media (prefers-reduced-motion: reduce) {
+  .ripple { animation: none; }
+  img { transition: none !important; }
+  .panel { transition: none; }
+  .panel-overlay { transition: none; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- BACK BUTTON -->
+<a class="back" href="index.html">← Research</a>
+
+<!-- FLOATING SIDE COLUMN -->
+<nav class="side-nav" aria-label="Research sections">
+  <button class="side-nav-item" data-section="abstract">
+    Abstract <span class="dot"></span>
+  </button>
+  <button class="side-nav-item" data-section="introduction">
+    Introduction <span class="dot"></span>
+  </button>
+  <button class="side-nav-item" data-section="literature">
+    Literature Review <span class="dot"></span>
+  </button>
+  <button class="side-nav-item" data-section="casestudy">
+    Case Study <span class="dot"></span>
+  </button>
+  <button class="side-nav-item" data-section="further">
+    Further Research <span class="dot"></span>
+  </button>
+  <button class="side-nav-item" data-section="bibliography">
+    Bibliography <span class="dot"></span>
+  </button>
+</nav>
+
+<!-- MOBILE RESEARCH BUTTON -->
+<button class="mobile-research-btn" data-section="abstract">
+  Research Paper ↗
+</button>
+
+<!-- PANEL OVERLAY (dimmer) -->
+<div class="panel-overlay" id="panel-overlay"></div>
+
+<!-- SLIDE-IN PANEL -->
+<div class="panel" id="research-panel" role="dialog" aria-modal="true">
+
+  <div class="panel-head">
+    <span class="panel-section-title" id="panel-title">Abstract</span>
+    <button class="panel-close" id="panel-close" aria-label="Close">×</button>
+  </div>
+
+  <div class="panel-tabs" role="tablist">
+    <button class="panel-tab active" data-section="abstract" role="tab">Abstract</button>
+    <button class="panel-tab" data-section="introduction" role="tab">Introduction</button>
+    <button class="panel-tab" data-section="literature" role="tab">Literature</button>
+    <button class="panel-tab" data-section="casestudy" role="tab">Case Study</button>
+    <button class="panel-tab" data-section="further" role="tab">Further Research</button>
+    <button class="panel-tab" data-section="bibliography" role="tab">Bibliography</button>
+  </div>
+
+  <div class="panel-body">
+
+    <!-- ABSTRACT -->
+    <div class="panel-content visible" id="content-abstract">
+      <h2>Abstract</h2>
+      <p>
+        This research investigates how sound operates not merely as a consequence of space, but as a pre-condition for the revelation of essences within built environments. Centred on the intermedia installation <em>an intimate room</em>, this paper examines how the rendering of sound as a visible force — through the vibration of material surfaces under acoustic pressure — discloses the architectural and cultural dimensions latent within a given space.
+      </p>
+      <p>
+        Working within the broader collaborative installation <em>Corrente de Vozes</em>, which distributes recordings of protest and water across a spatial audio system, <em>an intimate room</em> places a subwoofer, mylar membrane, and industrial light at the centre of this sonic field. The resulting visual trembling of the membrane makes audible what is ordinarily felt but not seen: the physical force of collective sound upon material surfaces.
+      </p>
+      <p>
+        Drawing on Michael Kelly's phenomenology of sound in contemporary art and Elias Canetti's theorisation of the crowd as a collective sonic organism, this paper argues that the installation enacts a form of acoustic palimpsest — a layering of cultural memory, protest, and the built environment made briefly visible before dissolving back into silence.
+      </p>
+    </div>
+
+    <!-- INTRODUCTION -->
+    <div class="panel-content" id="content-introduction">
+      <h2>Introduction</h2>
+      <p>
+        Sound is ordinarily understood as an effect — something produced by a source, travelling through a medium, arriving at a receiver. This paper begins from a different premise: that sound is a condition of possibility for the perception of space itself. What we hear shapes what we see, and what we feel determines how we understand our environment as meaningful.
+      </p>
+      <p>
+        The installation <em>an intimate room</em> emerged from a question about visibility. Can the act of amplifying sound into a space make that space disclose something it ordinarily withholds? Inside the room, an exposed subwoofer drives a crochet hoop stretched with mylar — a cheap, industrial, makeshift apparatus. A single light illuminates the membrane from above. As the surrounding installation's sound floods in, the mylar trembles, ripples, and refracts the light into moving patterns across the floor and walls.
+      </p>
+      <p>
+        What becomes visible in this trembling is not simply vibration. It is the meeting point between the cultural weight of the sounds — protest recordings from Lisbon and Peru, the rush of water — and the specific acoustic properties of the room in which they are played. The room, in this sense, is not a neutral container but an active participant.
+      </p>
+      <p>
+        This paper traces the theoretical lineage behind that claim, examines the case study in detail, and proposes directions for future research.
+      </p>
+    </div>
+
+    <!-- LITERATURE REVIEW -->
+    <div class="panel-content" id="content-literature">
+      <h2>Literature Review</h2>
+
+      <h3>Sound and the Phenomenology of Space</h3>
+      <p>
+        Michael Kelly's writing on sound art provides the foundational framework for this research. Kelly argues that sound in art does not merely add a temporal dimension to a spatial medium; it fundamentally transforms how that space is perceived. His claim that sound art "does not give us just the outline or contour of things — their size, shape and position — but also gives us the sense of their quality, or their relation to us: their texture, density, resistance, porosity, wetness, absorptiveness" (Kelly, 2011, p. 67) is central to understanding what <em>an intimate room</em> attempts.
+      </p>
+      <p>
+        This phenomenological position recasts the function of sound from descriptive to constitutive. Sound does not describe space; it produces the conditions under which space can be experienced as meaningful. The vibrating membrane in the installation makes this claim literal: it produces an image of sonic force that could not exist without the specific acoustic properties of this room, in this moment, receiving these sounds.
+      </p>
+
+      <blockquote>
+        <p>"Sound is doubly extramural: in a disciplinary sense, it adds to art a dimension that has traditionally been left to other, more temporal arts; secondly, in a more immediate or phenomenological sense, it introduces timely events into the permanent, partitioned world of art."</p>
+        <cite>— Kelly, 2011, p. 66</cite>
+      </blockquote>
+
+      <h3>The Crowd as Sonic Organism</h3>
+      <p>
+        Elias Canetti's <em>Crowds and Power</em> (1960) offers a complementary framework. Canetti's meditation on the sea as a model for collective voice — patient, persistent, made of many voices — directly informs <em>Corrente de Vozes</em>, the installation within which <em>an intimate room</em> was situated. His figure of the crowd as an organism with its own acoustic character — chant, percussion, the rhythmic repetition of collective action — maps onto the protest recordings distributed across the spatial audio system.
+      </p>
+      <p>
+        The use of protest recordings from Lisbon and Peru introduces a political dimension that the visual installation absorbs and refracts. The mylar membrane, shaking under the weight of collective voice, becomes a material register of political force — a body that responds to protest without representing it.
+      </p>
+
+      <h3>Acoustic Palimpsest</h3>
+      <p>
+        The concept of the palimpsest — a writing surface from which earlier text has been incompletely erased, leaving traces beneath new inscription — provides a useful metaphor for the sonic condition the installation explores. Every room carries acoustic memory: the residual reverb of previous sounds, the material properties that determine how sound behaves, the cultural associations that certain sounds activate.
+      </p>
+      <p>
+        <em>An intimate room</em> proposes the term <em>acoustic palimpsest</em> for this layered condition — the way a specific sound, played in a specific space, activates the room's material and cultural history. The membrane makes this layering briefly visible before the sound stops and the image dissolves.
+      </p>
+    </div>
+
+    <!-- CASE STUDY -->
+    <div class="panel-content" id="content-casestudy">
+      <h2>Case Study</h2>
+
+      <h3>Context and Collaboration</h3>
+      <p>
+        <em>An intimate room</em> was developed as a visual component within <em>Corrente de Vozes</em>, a multi-channel sound installation created by João Sarantopoulos and Irazema Vera. The larger installation distributed recordings of protest from Lisbon and Peru alongside recordings of water — rivers, ocean, underwater environments — across six speakers arranged within the space.
+      </p>
+      <p>
+        The collaboration emerged from a shared interest in the relationship between water and collective voice, and between acoustic phenomena and political memory. João Sarantopoulos's compositional work explored the spatial distribution of these layered recordings — the way the audience could move through the sound field and create their own relationship between water and protest. My visual work responded to this sonic environment by creating a central apparatus that made the force of that environment visible.
+      </p>
+
+      <h3>The Installation</h3>
+      <p>
+        Inside the room: a raw, exposed subwoofer connected to an amplifier driven by the output of the surrounding sound system. A crochet hoop cradles a sheet of thin mylar and ¼ CTB (Colour Temperature Blue) filter gel, resting on the circumference of the speaker so that the membrane sits directly above it. An industrial filmmaking stand holds two light sources — a cheap Chinese reading light and a battery-powered flashlight — aimed at the membrane from above.
+      </p>
+      <p>
+        Additional industrial stands support an array of Bluetooth speakers distributed around the room, projecting the protest and water recordings from several angles. One speaker points directly into a megaphone, further amplifying the cacophony. Two studio monitors push the low-frequency content of the water recordings, creating a physical pressure in the room.
+      </p>
+      <p>
+        As the sound builds, the mylar membrane begins to vibrate. The CTB gel introduces a cool blue cast to the light reflected from the moving surface. Patterns of rippling light appear on the floor, ceiling, and adjacent walls. The patterns shift with the frequency content of the sound — tighter under the high-frequency protest chants, slower and wider under the deep ocean recordings.
+      </p>
+
+      <h3>Analysis</h3>
+      <p>
+        The installation realises Kelly's claim that sound gives us "the sense of quality" of things. The membrane does not represent the protest or the water; it responds to them. Its shaking is not metaphorical but indexical — a direct physical consequence of the acoustic pressure produced by the recordings. In this sense the installation asks whether visibility itself can be a form of listening.
+      </p>
+      <p>
+        The choice of materials — mylar, crochet hoop, cheap consumer lights — is deliberate. The apparatus is visibly improvised, makeshift, fragile. This fragility mirrors the fragility of the protest recordings themselves: voices that were raised in a specific historical moment, captured, and now replayed in a space that did not witness them. The membrane shakes because of sounds that originated elsewhere, in different bodies, in different rooms.
+      </p>
+      <p>
+        The keffiyeh draped around the base of the apparatus in some configurations of the installation introduces an explicit political material — one that carries its own layered cultural and historical associations. In those configurations, the shaking membrane sits above a symbol of resistance, and the blue light falls across both, connecting them without explaining the connection.
+      </p>
+    </div>
+
+    <!-- FURTHER RESEARCH -->
+    <div class="panel-content" id="content-further">
+      <h2>Further Research</h2>
+      <p>
+        Several questions remain unresolved by this research and suggest directions for the second year of the programme.
+      </p>
+
+      <h3>The Durational Dimension</h3>
+      <p>
+        The installation as presented was of fixed duration — the sound played, the membrane vibrated, the light patterns appeared and dissolved. A longer durational version raises the question of how the acoustic palimpsest accumulates over time. Does a room that has been subjected to hours of protest sound carry a different quality than one that has heard it for minutes? And if so, is that difference perceptible — to the body, to recording equipment, to the next sound that enters the space?
+      </p>
+
+      <h3>Reciprocity</h3>
+      <p>
+        In the current work, the relationship between sound and material surface is one-directional: sound drives the membrane. A more complex version would explore reciprocity — how the material properties of the membrane and room alter the sound that passes through them. The crochet hoop introduces a specific pattern of dampening; the mylar reflects certain frequencies and absorbs others. Future work would make this reciprocal shaping audible as well as visible.
+      </p>
+
+      <h3>Multiplicity</h3>
+      <p>
+        A single membrane responds to the totality of the sound field. A future installation might distribute multiple membranes of different sizes, materials, and orientations across the room — each responding differently to the same acoustic environment, producing a spatial map of the room's sonic topology.
+      </p>
+
+      <h3>Site Specificity</h3>
+      <p>
+        The installation was developed for a specific room at Lusofona. The acoustic properties of that room — its dimensions, surface materials, the position of its doors and windows — are built into the work. Presenting the installation in a different room would produce a fundamentally different visual result. Future research would explore this site-specificity explicitly, developing documentation methodologies that capture not only what the membrane does but what the room's acoustic character is.
+      </p>
+    </div>
+
+    <!-- BIBLIOGRAPHY -->
+    <div class="panel-content" id="content-bibliography">
+      <h2>Bibliography</h2>
+
+      <div class="bib-entry">
+        <p>Canetti, E. (1960). <em>Crowds and Power.</em> Gollancz.</p>
+      </div>
+      <div class="bib-entry">
+        <p>Kelly, C. (2011). <em>Sound in the Age of its Reproducibility: Acoustic Modernity.</em> In C. Kelly (Ed.), <em>Sound</em> (pp. 63–78). Whitechapel Gallery / MIT Press.</p>
+      </div>
+      <div class="bib-entry">
+        <p>Labelle, B. (2010). <em>Acoustic Territories: Sound Culture and Everyday Life.</em> Continuum.</p>
+      </div>
+      <div class="bib-entry">
+        <p>Merleau-Ponty, M. (1945). <em>Phénoménologie de la perception.</em> Gallimard. [Translated as <em>Phenomenology of Perception,</em> Routledge, 2012.]</p>
+      </div>
+      <div class="bib-entry">
+        <p>Szendy, P. (2001). <em>Écoute: Une histoire de nos oreilles.</em> Minuit. [Translated as <em>All Ears: The Aesthetics of Espionage,</em> Fordham University Press, 2017.]</p>
+      </div>
+      <div class="bib-entry">
+        <p>Attali, J. (1977). <em>Bruits: Essai sur l'économie politique de la musique.</em> PUF. [Translated as <em>Noise: The Political Economy of Music,</em> University of Minnesota Press, 1985.]</p>
+      </div>
+      <div class="bib-entry">
+        <p>Voegelin, S. (2010). <em>Listening to Noise and Silence: Towards a Philosophy of Sound Art.</em> Continuum.</p>
+      </div>
+      <div class="bib-entry">
+        <p>Cox, C. &amp; Warner, D. (Eds.). (2004). <em>Audio Culture: Readings in Modern Music.</em> Continuum.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══ OPENING IMAGE — full viewport ══ -->
+<div class="opening">
+  <img
+    src="assets/img/20260523_059_cred_VeraMarmelo_web.jpg"
+    alt="The installation space — glowing hoop at centre, person silhouetted in doorway">
+  <div class="opening-text">
+    <p class="opening-eyebrow">Intermedia installation &nbsp;·&nbsp; Lusofona, Lisbon &nbsp;·&nbsp; May 2026</p>
+    <h1 class="title">
+      <span class="l1">"I just need</span>
+      <span class="l2">an intimate room,</span>
+      <span class="l3">a metal stand</span>
+      <span class="l4">and</span>
+      <span class="l5">a small (but powerful light)."</span>
+    </h1>
+  </div>
+</div>
+
+
+<!-- ══ ABOUT ══ -->
+<div class="label">
+  <p class="label-tag">About the work</p>
+  <p>
+    An intermedia installation using light to recast a soundscape as a visible force — revealing the architectural component of sound production. It fuses the cultural memory of space with the echo-less imprint of captured and reproduced sound.
+  </p>
+  <p>
+    Inside the room, an amplifier connects to a raw, exposed subwoofer. A crochet hoop loosely cradles thin mylar and ¼ Colour Temperature Blue filter gel, resting on the circumference of the speaker. A strong, industrial filmmaking stand holds a cheap Chinese reading light and a battery-powered flashlight. The sounds of protest are amplified around this central altar.
+  </p>
+  <p>
+    Several industrial stands hold an array of bluetooth speakers projecting into the room from several angles. One speaker shouts directly into a megaphone, further amplifying the cacophony. A rush of waves pumps from two monitors placed next to the lights.
+  </p>
+</div>
+
+
+<!-- ══ IMAGE — the altar close ══ -->
+<div class="img-full">
+  <img
+    src="assets/img/20260523_055_cred_VeraMarmelo_web.jpg"
+    alt="Close-up of the glowing mylar and crochet hoop on the subwoofer">
+</div>
+<p class="img-caption">The central altar — mylar, CTB gel, crochet hoop on subwoofer</p>
+
+
+<!-- ══ IMAGE — wide, full room ══ -->
+<div class="img-full" style="height:90vh; margin-top:3px;">
+  <img
+    src="assets/img/20260523_056_cred_VeraMarmelo_web.jpg"
+    alt="The altar and surrounding stand infrastructure">
+</div>
+
+
+<!-- ══ FIRST QUOTE ══ -->
+<div class="label" style="padding-top: 80px;">
+  <blockquote>
+    <p>"does not give us just the outline or contour of things – their size, shape and position – but also gives us the sense of their quality, or their relation to us: their texture, density, resistance, porosity, wetness, absorptiveness."</p>
+    <cite>— Kelly, 2011, p. 67</cite>
+  </blockquote>
+</div>
+
+
+<!-- ══ PAIR — keffiyeh + room overview ══ -->
+<div class="img-pair">
+  <div class="img-cell">
+    <img
+      src="assets/img/20260523_072_cred_VeraMarmelo_web.jpg"
+      alt="Keffiyeh-wrapped altar with monitors visible">
+  </div>
+  <div class="img-cell">
+    <img
+      src="assets/img/20260523_058_cred_VeraMarmelo_web.jpg"
+      alt="Full room — all stands, speakers, traffic cone">
+  </div>
+</div>
+
+
+<!-- ══ HALF IMAGE — stands and reflector, right aligned ══ -->
+<div class="img-half right" style="margin-top:3px;">
+  <img
+    src="assets/img/20260523_057_cred_VeraMarmelo_web.jpg"
+    alt="Large reflector light on stand, hoop on floor below">
+</div>
+<p class="img-caption" style="text-align:right; padding-right:44px; padding-left:0;">
+  Industrial reflector, crochet hoop on floor
+</p>
+
+
+<!-- ══ CONTEXT ══ -->
+<div class="label" style="padding-top: 80px; max-width: 600px;">
+  <p class="label-tag">Context</p>
+  <p>
+    Absorbing the sounds of the surrounding installation — <em>Corrente de Vozes</em>, a multi-channel work by João Sarantopoulos and Irazema Vera — <em>an intimate room</em> claims that sound is not a consequence of, but a pre-condition for, the revelation of essences within the environment. Sound instigates sight and uncovers hidden dimensions in the built environment.
+  </p>
+  <blockquote>
+    <p>"Sound is doubly extramural: in a disciplinary sense, it adds to art a dimension that has traditionally been left to other, more temporal arts; secondly, in a more immediate or phenomenological sense, it introduces timely events into the permanent, partitioned world of art."</p>
+    <cite>— Kelly, 2011, p. 66</cite>
+  </blockquote>
+</div>
+
+
+<!-- ══ MEGAPHONE IMAGES ══ -->
+<div class="img-full">
+  <img
+    src="assets/img/20260523_061_cred_VeraMarmelo_web.jpg"
+    alt="Megaphone on stand, light projected across the ceiling">
+</div>
+<p class="img-caption">Megaphone on industrial stand — the cacophony projected upward</p>
+
+
+<div class="img-half" style="margin-top:3px;">
+  <img
+    src="assets/img/20260523_062_cred_VeraMarmelo_web.jpg"
+    alt="Wide shot of the megaphone room with atmospheric light projection">
+</div>
+
+
+<!-- ══ ALTAR DETAIL ══ -->
+<div class="img-full" style="margin-top:3px; height:90vh;">
+  <img
+    src="assets/img/20260523_060_cred_VeraMarmelo_web.jpg"
+    alt="The altar surrounded by industrial stands and cables">
+</div>
+
+
+<!-- ══ VIDEO ══ -->
+<div class="label" style="padding-bottom: 32px;">
+  <p class="label-tag">Video documentation</p>
+</div>
+
+<div class="video-pair">
+  <div class="video-cell">
+    <iframe
+      src="https://www.youtube.com/embed/QHsEC8SukC0"
+      title="an intimate room — documentation I"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
+  <div class="video-cell">
+    <iframe
+      src="https://www.youtube.com/embed/3mvREIIFGTQ"
+      title="an intimate room — documentation II"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen>
+    </iframe>
+  </div>
+</div>
+
+
+<!-- ══ SPATIAL AUDIO ══ -->
+<div class="player-section">
+  <p class="player-tag">Spatial audio — Corrente de Vozes</p>
+  <div class="player-inner">
+    <p class="player-hint">
+      Drag the listener to move through the space. The volume and panning of each channel shifts as you move — approximating the spatial distribution of the six-speaker installation. Click any speaker to isolate or mute it.
+    </p>
+
+    <div id="room"></div>
+
+    <div id="vol-panel">
+      <div class="vol-label">Channel levels</div>
+      <div id="vol-bars"></div>
+    </div>
+
+    <button id="play-btn" onclick="toggleAll()">▶ Play all channels</button>
+    <div id="player-status"></div>
+  </div>
+</div>
+
+
+<!-- ══ FINAL IMAGE ══ -->
+<div class="img-full" style="height:95vh;">
+  <img
+    src="assets/img/20260523_056_cred_VeraMarmelo_web.jpg"
+    alt="The installation — the altar with the full network of stands visible">
+</div>
+
+
+<!-- ══ CREDITS ══ -->
+<div class="credits">
+  <p class="credits-tag">Credits</p>
+  <div class="credits-grid">
+    <div class="credits-col">
+      <p class="cl">Visuals</p>
+      <p class="cv">Justin Enoch<br>ReSound<br>Lusofona · 2026</p>
+    </div>
+    <div class="credits-col">
+      <p class="cl">Sound</p>
+      <p class="cv">
+        <a href="https://jjsarantopoulos.wixsite.com/ctjj1/corrente-de-vozes" target="_blank">João Sarantopoulos</a><br>
+        Irazema Vera
+      </p>
+    </div>
+    <div class="credits-col">
+      <p class="cl">Photography</p>
+      <p class="cv">Vera Marmelo<br>© 2026</p>
+    </div>
+    <div class="credits-col">
+      <p class="cl">Supervisor</p>
+      <p class="cv">Adriana De Sá</p>
+    </div>
+    <div class="credits-col">
+      <p class="cl">Reference</p>
+      <p class="cv">Kelly, C. (2011)<br><em>Sound in the Age<br>of its Reproducibility</em></p>
+    </div>
+    <div class="credits-col">
+      <p class="cl">Font</p>
+      <p class="cv">
+        <a href="https://velvetyne.fr/fonts/karrik/" target="_blank">Karrik</a><br>
+        Velvetyne · SIL OFL
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ SPATIAL AUDIO JS ══ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+<script>
+const SPEAKERS = [
+  { id:0, rx:0.22, ry:0.18, label:'SP2',   url:'https://static.wixstatic.com/mp3/f92501_1f3102f5df1342338287a82e5505ceea.mp3' },
+  { id:1, rx:0.78, ry:0.18, label:'SP1',   url:'https://static.wixstatic.com/mp3/f92501_2f8aa26ccd0141ab83a32bbbca71508a.mp3' },
+  { id:2, rx:0.50, ry:0.50, label:'WATER', url:'https://static.wixstatic.com/mp3/f92501_5ca26b24c9264dce9cde35cb51a6be8b.mp3' },
+  { id:3, rx:0.22, ry:0.82, label:'SP3',   url:'https://static.wixstatic.com/mp3/f92501_a619f7985e9046439b457a0f89b220bf.mp3' },
+  { id:4, rx:0.78, ry:0.82, label:'SP4',   url:'https://static.wixstatic.com/mp3/f92501_621f4bee42dd485db69d1142c1bf4d78.mp3' },
+];
+
+let listener = {rx:0.5, ry:0.5};
+let isPlaying=false, toneStarted=false;
+let active=SPEAKERS.map(()=>true);
+let players=[], panners=[];
+let loaded=SPEAKERS.map(()=>false);
+
+const iconSpk  = `<svg viewBox="0 0 24 24"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>`;
+const iconHead = `<svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3z"/><path d="M3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>`;
+
+const room=document.getElementById('room');
+const volBars=document.getElementById('vol-bars');
+const statusEl=document.getElementById('player-status');
+
+function setStatus(m){statusEl.textContent=m;}
+function calcVol(s){const dx=s.rx-listener.rx,dy=s.ry-listener.ry,d=Math.sqrt(dx*dx+dy*dy);return Math.min(1,Math.max(0,1-d/0.85)**2);}
+function calcPan(s){return Math.max(-1,Math.min(1,(s.rx-listener.rx)*2.2));}
+function calcDb(v){return v>0.01?20*Math.log10(v)-4:-80;}
+
+function render(){
+  room.innerHTML='';
+  SPEAKERS.forEach((s,i)=>{
+    if(isPlaying&&active[i]&&loaded[i]){
+      const r=document.createElement('div');
+      r.className='ripple';
+      r.style.left=(s.rx*100)+'%';
+      r.style.top=(s.ry*100)+'%';
+      r.style.animationDelay=(i*0.44)+'s';
+      room.appendChild(r);
+    }
+    const lbl=document.createElement('span');
+    lbl.className='speaker-label'+(s.label==='WATER'?' water':'');
+    lbl.style.left=(s.rx*100)+'%';
+    lbl.style.top=(s.ry*100)+'%';
+    lbl.textContent=s.label;
+    room.appendChild(lbl);
+
+    const dot=document.createElement('div');
+    dot.className='speaker-dot'+((!loaded[i])?' loading':(isPlaying&&active[i])?' playing':'');
+    dot.style.left=(s.rx*100)+'%';
+    dot.style.top=(s.ry*100)+'%';
+    dot.innerHTML=iconSpk;
+    dot.addEventListener('click',()=>{if(loaded[i])toggleSpeaker(i);});
+    room.appendChild(dot);
+  });
+
+  const ld=document.createElement('div');
+  ld.className='listener-dot';
+  ld.style.left=(listener.rx*100)+'%';
+  ld.style.top=(listener.ry*100)+'%';
+  ld.innerHTML=iconHead;
+  room.appendChild(ld);
+  makeDraggable(ld);
+  renderVolBars();
+}
+
+function renderVolBars(){
+  volBars.innerHTML='';
+  SPEAKERS.forEach((s,i)=>{
+    const vol=(active[i]&&loaded[i])?calcVol(s):0;
+    const pan=calcPan(s);
+    const side=pan<-0.15?'← L':pan>0.15?'R →':'C';
+    const pct=Math.round(vol*100);
+    const row=document.createElement('div');
+    row.className='vol-row';
+    row.innerHTML=`<span class="vol-name${s.label==='WATER'?' water':''}">${s.label}</span><div class="vol-bg"><div class="vol-fill" style="width:${pct}%"></div></div><span class="vol-pct">${pct}%</span><span class="vol-side">${side}</span>`;
+    volBars.appendChild(row);
+  });
+}
+
+function updateAudio(){
+  if(!toneStarted||!isPlaying)return;
+  SPEAKERS.forEach((s,i)=>{
+    if(!panners[i]||!loaded[i])return;
+    const v=active[i]?calcVol(s):0;
+    panners[i].pan.rampTo(calcPan(s),0.05);
+    players[i].volume.rampTo(calcDb(v),0.05);
+  });
+}
+
+async function startAudio(){
+  await Tone.start();
+  toneStarted=true;
+  setStatus('Loading...');
+  document.getElementById('play-btn').disabled=true;
+
+  const proms=SPEAKERS.map((s,i)=>new Promise(res=>{
+    const pan=new Tone.Panner(0).toDestination();
+    const pl=new Tone.Player({
+      url:s.url, loop:true, autostart:false,
+      onload:()=>{
+        loaded[i]=true;
+        setStatus('Loading '+loaded.filter(Boolean).length+' / '+SPEAKERS.length);
+        render(); res();
+      },
+      onerror:()=>{setStatus('Error: '+s.label); res();}
+    }).connect(pan);
+    panners.push(pan); players.push(pl);
+  }));
+
+  await Promise.all(proms);
+  isPlaying=true;
+  const btn=document.getElementById('play-btn');
+  btn.disabled=false;
+  btn.textContent='◼ Stop';
+  btn.classList.add('active');
+  setStatus('');
+
+  SPEAKERS.forEach((s,i)=>{
+    if(active[i]&&loaded[i]){
+      players[i].volume.value=calcDb(calcVol(s));
+      panners[i].pan.value=calcPan(s);
+      players[i].start();
+    }
+  });
+  render();
+}
+
+function stopAudio(){
+  isPlaying=false;
+  players.forEach(p=>{try{p.stop();}catch(e){}});
+  const btn=document.getElementById('play-btn');
+  btn.textContent='▶ Play all channels';
+  btn.classList.remove('active');
+  setStatus('');
+  render();
+}
+
+function toggleAll(){(!toneStarted||!isPlaying)?startAudio():stopAudio();}
+
+function toggleSpeaker(i){
+  active[i]=!active[i];
+  if(isPlaying&&loaded[i]){
+    if(active[i]){players[i].volume.value=calcDb(calcVol(SPEAKERS[i]));panners[i].pan.value=calcPan(SPEAKERS[i]);players[i].start();}
+    else{players[i].stop();}
+  }
+  render();
+}
+
+function makeDraggable(el){
+  let drag=false,pid;
+  el.addEventListener('pointerdown',e=>{drag=true;pid=e.pointerId;el.setPointerCapture(pid);e.preventDefault();});
+  el.addEventListener('pointermove',e=>{
+    if(!drag||e.pointerId!==pid)return;
+    const r=room.getBoundingClientRect();
+    listener.rx=Math.max(0.03,Math.min(0.97,(e.clientX-r.left)/r.width));
+    listener.ry=Math.max(0.03,Math.min(0.97,(e.clientY-r.top)/r.height));
+    el.style.left=(listener.rx*100)+'%';
+    el.style.top=(listener.ry*100)+'%';
+    updateAudio(); renderVolBars();
+  });
+  el.addEventListener('pointerup',()=>{drag=false;});
+  el.addEventListener('pointercancel',()=>{drag=false;});
+}
+
+render();
+</script>
+
+<!-- ══ PANEL JS ══ -->
+<script>
+(function() {
+  var panel       = document.getElementById('research-panel');
+  var overlay     = document.getElementById('panel-overlay');
+  var closeBtn    = document.getElementById('panel-close');
+  var panelTitle  = document.getElementById('panel-title');
+  var sideItems   = document.querySelectorAll('.side-nav-item');
+  var tabs        = document.querySelectorAll('.panel-tab');
+  var contents    = document.querySelectorAll('.panel-content');
+  var mobileBtn   = document.querySelector('.mobile-research-btn');
+
+  var LABELS = {
+    abstract:     'Abstract',
+    introduction: 'Introduction',
+    literature:   'Literature Review',
+    casestudy:    'Case Study',
+    further:      'Further Research',
+    bibliography: 'Bibliography'
+  };
+
+  var currentSection = 'abstract';
+
+  function openPanel(section) {
+    currentSection = section || 'abstract';
+    showSection(currentSection);
+    panel.classList.add('open');
+    overlay.classList.add('open');
+    panel.focus();
+    // mark active side item
+    sideItems.forEach(function(item) {
+      item.classList.toggle('active', item.dataset.section === currentSection);
+    });
+  }
+
+  function closePanel() {
+    panel.classList.remove('open');
+    overlay.classList.remove('open');
+    sideItems.forEach(function(item) { item.classList.remove('active'); });
+  }
+
+  function showSection(section) {
+    currentSection = section;
+    // update title
+    panelTitle.textContent = LABELS[section] || section;
+    // show correct content
+    contents.forEach(function(c) {
+      c.classList.toggle('visible', c.id === 'content-' + section);
+    });
+    // update tabs
+    tabs.forEach(function(t) {
+      t.classList.toggle('active', t.dataset.section === section);
+    });
+    // update side items
+    sideItems.forEach(function(item) {
+      item.classList.toggle('active', item.dataset.section === section);
+    });
+    // scroll panel body to top
+    var body = panel.querySelector('.panel-body');
+    if (body) body.scrollTop = 0;
+  }
+
+  // Side nav clicks
+  sideItems.forEach(function(item) {
+    item.addEventListener('click', function() {
+      var section = item.dataset.section;
+      if (panel.classList.contains('open') && currentSection === section) {
+        closePanel();
+      } else {
+        openPanel(section);
+      }
+    });
+  });
+
+  // Tab clicks inside panel
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      showSection(tab.dataset.section);
+    });
+  });
+
+  // Mobile button
+  if (mobileBtn) {
+    mobileBtn.addEventListener('click', function() {
+      openPanel(mobileBtn.dataset.section || 'abstract');
+    });
+  }
+
+  // Close button
+  closeBtn.addEventListener('click', closePanel);
+
+  // Overlay click
+  overlay.addEventListener('click', closePanel);
+
+  // Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && panel.classList.contains('open')) closePanel();
+  });
+
+})();
+</script>
+</body>
+</html>
