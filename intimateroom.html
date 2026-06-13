@@ -1718,15 +1718,10 @@ render();
     var cols = Math.ceil(w / ps);
     var rows = Math.ceil(h / ps);
 
-    ctx.clearRect(0, 0, w, h);
-
+    /* No clearRect — overwrite every pixel each frame */
     for (var col = 0; col < cols; col++) {
-      /* Smooth fade: 0 opacity at left, full at right */
-      var xf = (col + 0.5) / cols;
-      var alpha = Math.pow(xf, 1.8); /* ease in — slow start, full at right */
-      if (alpha < 0.01) continue;
-
-      ctx.globalAlpha = alpha * 0.72; /* overall subtlety cap */
+      var xf    = (col + 0.5) / cols;
+      var alpha = Math.pow(xf, 1.8) * 0.72;
 
       for (var row = 0; row < rows; row++) {
         var lum = luminance(col * ps, row * ps, time);
@@ -1737,15 +1732,14 @@ render();
         var palIdx = lum * (COLS.length - 1);
         var lo = Math.floor(palIdx), hi = Math.min(COLS.length - 1, lo + 1);
         var frac = palIdx - lo;
-
         var color = (frac > threshold) ? COLS[hi] : COLS[lo];
 
-        ctx.fillStyle = 'rgb(' + color[0] + ',' + color[1] + ',' + color[2] + ')';
+        /* Blend color with transparent by using rgba + alpha */
+        ctx.fillStyle = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + alpha + ')';
         ctx.fillRect(col * ps, row * ps, ps, ps);
       }
     }
 
-    ctx.globalAlpha = 1;
     requestAnimationFrame(draw);
   }
 
