@@ -1657,7 +1657,6 @@ render();
   if (!canvas) return;
   var ctx = canvas.getContext('2d');
 
-  /* Bayer 4×4 ordered dither matrix (normalised 0–1) */
   var BAYER4 = [
      0/16,  8/16,  2/16, 10/16,
     12/16,  4/16, 14/16,  6/16,
@@ -1665,85 +1664,96 @@ render();
     15/16,  7/16, 13/16,  5/16
   ];
 
-  var PIXEL = 3;      /* dither block size in px */
-  var COLS  = [       /* palette: dark bg → blue accent */
-    [12,  12,  12],   /* near black */
-    [30,  30,  30],
-    [55,  55,  60],
-    [74, 158, 255],   /* blue accent */
-    [180,200,230],    /* light blue */
-    [232,230,224],    /* near white */
+  var PIXEL = 4;
+  var COLS  = [
+    [12,  12,  12],
+    [30,  30,  35],
+    [55,  55,  65],
+    [74, 158, 255],
+    [180,200,230],
+    [232,230,224],
   ];
 
+  var w = 0, h = 0, imgData = null;
+
   function resize() {
-    canvas.width  = Math.round(canvas.offsetWidth  * window.devicePixelRatio);
-    canvas.height = Math.round(canvas.offsetHeight * window.devicePixelRatio);
+    w = Math.round(canvas.offsetWidth  * (window.devicePixelRatio || 1));
+    h = Math.round(canvas.offsetHeight * (window.devicePixelRatio || 1));
+    canvas.width  = w;
+    canvas.height = h;
+    imgData = ctx.createImageData(w, h);
   }
 
-  window.addEventListener('resize', resize);
-  resize();
-
-  /* Build a small noise field that slowly animates */
-  var t = 0;
-
-  function luminance(x, y, time) {
-    var w = canvas.width, h = canvas.height;
-    var xf = x / w;   /* 0 left → 1 right */
-    var yf = y / h;
-
-    /* Base: gradient dark on left, slightly lighter on right */
-    var base = 0.08 + xf * 0.18;
-
-    /* Slow animated noise — vertical bands */
-    var wave1 = Math.sin(yf * 4.2 + xf * 1.8 + time * 0.0006) * 0.12;
-    var wave2 = Math.sin(yf * 9.1 - xf * 3.1 + time * 0.0009) * 0.06;
-    var wave3 = Math.sin(yf * 2.3 + time * 0.0004) * 0.04;
-
-    return base + wave1 + wave2 + wave3;
-  }
-
-  function closestColor(lum) {
-    /* Map 0–1 luminance to palette index */
-    var idx = Math.round(lum * (COLS.length - 1));
-    idx = Math.max(0, Math.min(COLS.length - 1, idx));
-    return COLS[idx];
-  }
-
-  function draw(time) {
-    t = time;
-    var w = canvas.width, h = canvas.height;
-    var dpr = window.devicePixelRatio || 1;
-    var ps  = PIXEL * dpr;
-
+  function drawFrame(t) {
+    if (!imgData || !w || !h) return;
+    var dpr  = window.devicePixelRatio || 1;
+    var ps   = PIXEL * dpr;
     var cols = Math.ceil(w / ps);
     var rows = Math.ceil(h / ps);
+    var data = imgData.data;
+    var ts   = t * 0.0003; /* slow time scale */
 
-    /* No clearRect — overwrite every pixel each frame */
     for (var col = 0; col < cols; col++) {
       var xf    = (col + 0.5) / cols;
-      var alpha = Math.pow(xf, 1.8) * 0.72;
+      var alpha = Math.pow(xf, 2.0) * 0.85;
+      var a255  = Math.round(alpha * 255);
 
       for (var row = 0; row < rows; row++) {
-        var lum = luminance(col * ps, row * ps, time);
+        var yf  = (row + 0.5) / rows;
 
-        var bx = col % 4, by = row % 4;
-        var threshold = BAYER4[by * 4 + bx];
+        var lum = 0.06
+          + Math.sin(yf * 4.1 + xf * 1.9 + ts * 1.1) * 0.11
+          + Math.sin(yf * 8.7 - xf * 3.2 + ts * 0.7) * 0.06
+          + Math.sin(yf * 2.4 + xf * 0.8 + ts * 1.5) * 0.04;
 
-        var palIdx = lum * (COLS.length - 1);
-        var lo = Math.floor(palIdx), hi = Math.min(COLS.length - 1, lo + 1);
-        var frac = palIdx - lo;
-        var color = (frac > threshold) ? COLS[hi] : COLS[lo];
+        var bx  = col % 4, by = row % 4;
+        var thr = BAYER4[by * 4 + bx];
+        var pi  = Math.max(0, Math.min(COLS.length - 1.001, lum * (COLS.length - 1)));
+        var lo  = Math.floor(pi), hi = lo + 1 < COLS.length ? lo + 1 : lo;
+        var c   = ((pi - lo) > thr) ? COLS[hi] : COLS[lo];
 
-        /* Blend color with transparent by using rgba + alpha */
-        ctx.fillStyle = 'rgba(' + color[0] + ',' + color[1] + ',' + color[2] + ',' + alpha + ')';
-        ctx.fillRect(col * ps, row * ps, ps, ps);
+        /* write pixel block */
+        for (var py = 0; py < ps; py++) {
+          var ry = row * ps + py; if (ry >= h) break;
+          for (var px = 0; px < ps; px++) {
+            var rx = col * ps + px; if (rx >= w) break;
+            var i = (ry * w + rx) * 4;
+            data[i]     = c[0];
+            data[i + 1] = c[1];
+            data[i + 2] = c[2];
+            data[i + 3] = a255;
+          }
+        }
       }
     }
 
-    requestAnimationFrame(draw);
+    ctx.putImageData(imgData, 0, 0);
   }
 
-  requestAnimationFrame(draw);
+  var raf;
+  function loop(t) {
+    drawFrame(t);
+    raf = requestAnimationFrame(loop);
+  }
+
+  /* Restart loop on visibility change — this is why it was disappearing */
+  document.addEventListener('visibilitychange', function() {
+    if (document.hidden) {
+      cancelAnimationFrame(raf);
+    } else {
+      raf = requestAnimationFrame(loop);
+    }
+  });
+
+  window.addEventListener('resize', function() {
+    resize();
+  });
+
+  setTimeout(function() {
+    resize();
+    raf = requestAnimationFrame(loop);
+  }, 50);
+
 })();
 </script>
 </body>
