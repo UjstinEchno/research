@@ -800,27 +800,7 @@ body {
 .panel-content { display: none; }
 .panel-content.visible { display: block; }
 
-/* ── PALIMPSEST GHOST IMAGES ── */
-.ghost {
-  position: fixed;
-  z-index: 50;
-  pointer-events: none;
-  overflow: hidden;
-  transform: translate(-50%, -50%);
-  opacity: 0;
-  transition: opacity 0.4s ease-in;
-}
-
-.ghost img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  filter: saturate(0.6) brightness(0.85);
-}
-
-.ghost.visible  { opacity: 1; }
-.ghost.fading   { opacity: 0; transition: opacity 4s ease-out; }
+/* dither canvas behind side nav */
 #nav-distort-canvas {
   position: fixed;
   right: 0;
@@ -1670,94 +1650,6 @@ render();
 
 })();
 </script>
-<!-- ══ PALIMPSEST CLICK JS ══ -->
-<script>
-(function() {
-
-  var IMAGES = [
-    'assets/img/20260523_055_cred_VeraMarmelo_web.jpg',
-    'assets/img/20260523_056_cred_VeraMarmelo_web.jpg',
-    'assets/img/20260523_057_cred_VeraMarmelo_web.jpg',
-    'assets/img/20260523_058_cred_VeraMarmelo_web.jpg',
-    'assets/img/20260523_060_cred_VeraMarmelo_web.jpg',
-    'assets/img/20260523_061_cred_VeraMarmelo_web.jpg',
-    'assets/img/20260523_062_cred_VeraMarmelo_web.jpg',
-    'assets/img/20260523_072_cred_VeraMarmelo_web.jpg',
-  ];
-
-  /* Preload all images so they appear instantly on click */
-  IMAGES.forEach(function(src) {
-    var img = new Image(); img.src = src;
-  });
-
-  /* Shuffled deck — refill when exhausted */
-  var deck = [];
-  function nextImage() {
-    if (!deck.length) {
-      deck = IMAGES.slice().sort(function() { return Math.random() - 0.5; });
-    }
-    return deck.pop();
-  }
-
-  /* Ghost size: portrait or landscape randomly, centred on click */
-  var SIZES = [
-    { w: '38vw', h: '55vh' },
-    { w: '45vw', h: '42vh' },
-    { w: '32vw', h: '60vh' },
-    { w: '52vw', h: '48vh' },
-    { w: '28vw', h: '50vh' },
-  ];
-
-  var FADE_IN_MS  = 400;
-  var HOLD_MS     = 15000;
-  var FADE_OUT_MS = 4000;
-
-  function spawnGhost(x, y) {
-    var src  = nextImage();
-    var size = SIZES[Math.floor(Math.random() * SIZES.length)];
-
-    var ghost = document.createElement('div');
-    ghost.className = 'ghost';
-    ghost.style.left   = x + 'px';
-    ghost.style.top    = y + 'px';
-    ghost.style.width  = size.w;
-    ghost.style.height = size.h;
-
-    var img = document.createElement('img');
-    img.src = src;
-    img.alt = '';
-    ghost.appendChild(img);
-    document.body.appendChild(ghost);
-
-    /* Fade in */
-    requestAnimationFrame(function() {
-      requestAnimationFrame(function() {
-        ghost.classList.add('visible');
-      });
-    });
-
-    /* Hold, then fade out */
-    setTimeout(function() {
-      ghost.classList.remove('visible');
-      ghost.classList.add('fading');
-      setTimeout(function() {
-        if (ghost.parentNode) ghost.parentNode.removeChild(ghost);
-      }, FADE_OUT_MS);
-    }, HOLD_MS);
-  }
-
-  /* Listen for clicks — ignore interactive elements */
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('a, button, input, select, textarea, audio, video, iframe, #research-panel, .side-nav, #play-btn, #vol-panel, #room')) return;
-    spawnGhost(e.clientX, e.clientY);
-  });
-
-  /* Subtle cursor hint */
-  document.body.style.cursor = 'crosshair';
-
-})();
-</script>
-
 <!-- ══ DITHER NAV EFFECT ══ -->
 <script>
 (function() {
