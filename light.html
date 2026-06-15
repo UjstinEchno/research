@@ -2178,9 +2178,11 @@ window.addEventListener('load', function() {
       if (dissolveProgress >= 1) {
         /* Dither fully dissolved — now fade the overlay */
         loader.classList.add('hidden');
-        document.body.style.overflow = '';
         cancelAnimationFrame(raf);
-        setTimeout(function() { loader.style.display = 'none'; }, 1300);
+        setTimeout(function() {
+          loader.style.display = 'none';
+          document.body.style.overflow = '';
+        }, 1300);
         return;
       }
     } else {
