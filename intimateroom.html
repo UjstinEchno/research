@@ -1717,6 +1717,16 @@ function makeDraggable(el) {
 }
 
 render();
+
+/* Pre-fetch all audio files into browser cache on page load
+   so they're ready instantly when the user hits Play.
+   Browsers block AudioContext until a user gesture, but fetch
+   has no such restriction — files land in the HTTP cache silently. */
+window.addEventListener('load', function() {
+  SPEAKERS.forEach(function(s) {
+    fetch(s.url, { mode: 'no-cors' }).catch(function() {});
+  });
+});
 </script>
 
 <!-- ══ PANEL JS ══ -->
