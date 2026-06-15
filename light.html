@@ -981,6 +981,11 @@ body {
 }
 
 </style>
+<style>
+  /* Show loader immediately — before any other CSS or content loads */
+  #loader { position:fixed; inset:0; z-index:9999; background:#0c0c0c; }
+  body { overflow: hidden; } /* prevent scroll while loading */
+</style>
 </head>
 <body>
 
@@ -2173,6 +2178,7 @@ window.addEventListener('load', function() {
       if (dissolveProgress >= 1) {
         /* Dither fully dissolved — now fade the overlay */
         loader.classList.add('hidden');
+        document.body.style.overflow = '';
         cancelAnimationFrame(raf);
         setTimeout(function() { loader.style.display = 'none'; }, 1300);
         return;
