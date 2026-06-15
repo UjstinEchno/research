@@ -984,7 +984,6 @@ body {
 <style>
   /* Show loader immediately — before any other CSS or content loads */
   #loader { position:fixed; inset:0; z-index:9999; background:#0c0c0c; }
-  body { overflow: hidden; } /* prevent scroll while loading */
 </style>
 </head>
 <body>
@@ -2181,7 +2180,6 @@ window.addEventListener('load', function() {
         cancelAnimationFrame(raf);
         setTimeout(function() {
           loader.style.display = 'none';
-          document.body.style.overflow = '';
         }, 1300);
         return;
       }
