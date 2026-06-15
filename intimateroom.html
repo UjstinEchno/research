@@ -970,7 +970,7 @@ body {
 
 <!-- AMBIENT PLAYER -->
 <div id="ambient-player">
-  <button id="ambient-toggle" title="Play / pause">▶</button>
+  <button id="ambient-toggle" title="Play / pause">play</button>
   <span id="ambient-label">mylar sheet</span>
   <input id="ambient-vol" type="range" min="0" max="1" step="0.01" value="0.25" title="Volume">
 </div>
@@ -2007,11 +2007,11 @@ render();
   toggle.addEventListener('click', function() {
     if (audio.paused) {
       audio.play();
-      toggle.textContent = '◼';
+      toggle.textContent = 'stop';
       toggle.classList.add('playing');
     } else {
       audio.pause();
-      toggle.textContent = '▶';
+      toggle.textContent = 'play';
       toggle.classList.remove('playing');
     }
   });
