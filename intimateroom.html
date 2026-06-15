@@ -1672,17 +1672,9 @@ async function startAudio() {
 
   render();
 
-  // Load WATER first (index 2) — it's the centrepiece
-  const waterIdx = SPEAKERS.findIndex(s => s.label === 'WATER');
-  setStatus('Loading WATER channel...');
-  await loadChannel(waterIdx);
-
-  // Then quietly load SP1 and SP2 in background (front channels, most likely to be wanted next)
-  loadChannel(SPEAKERS.findIndex(s => s.label === 'SP1'));
-  loadChannel(SPEAKERS.findIndex(s => s.label === 'SP2'));
-
-  setStatus('Tap any speaker to load that channel');
-  setTimeout(() => { if (statusEl.textContent.includes('Tap')) setStatus(''); }, 3000);
+  // Load all channels on Play
+  setStatus('Loading channels...');
+  await Promise.all(SPEAKERS.map((s, i) => loadChannel(i)));
 }
 
 function stopAudio() {
